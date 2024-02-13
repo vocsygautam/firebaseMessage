@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class Noti {
@@ -28,8 +26,10 @@ class Noti {
 
   static Future<void> setupFlutterNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/launcher_icon');
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings(onDidReceiveLocalNotification : onDidReceiveLocalNotification);
     await flutterLocalNotificationsPlugin.initialize(
-      const InitializationSettings(android: initializationSettingsAndroid),
+      const InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsDarwin),
       onDidReceiveNotificationResponse: (details) {
         selectNotificationStream.add(details.payload);
       },
@@ -43,6 +43,13 @@ class Noti {
         flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     await androidImplementation?.requestNotificationsPermission();
 
+    /// Create an IOS Notification Channel.
+    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
     /// Update the iOS foreground notification presentation options to allow
     /// heads up notifications.
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
@@ -52,6 +59,8 @@ class Noti {
     );
     configureSelectNotificationSubject();
   }
+  /// IOS Receive Notification
+  static void onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) async {}
 
   static void configureSelectNotificationSubject() {
     selectNotificationStream.stream.listen((String? payload) async {
@@ -70,7 +79,7 @@ class Noti {
         msg['body'],
         payload: jsonEncode(msg),
         NotificationDetails(
-          android: AndroidNotificationDetails(channel.id, channel.name,icon: "@mipmap/launcher_icon"),
+          android: AndroidNotificationDetails(channel.id, channel.name, icon: "@mipmap/launcher_icon"),
         ),
       );
     }
