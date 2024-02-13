@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "472984054820",
+    "project_id": "fir-mssagedemo",
+    "storage_bucket": "fir-mssagedemo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472984054820:android:13243ddc34ff02bfe0bcb1",
+        "android_client_info": {
+          "package_name": "com.example.firebase_message_demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAy5Y793klrqNbK_NgQAUWC-EKTfLYEAGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
