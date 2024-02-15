@@ -9,7 +9,26 @@
       "client_info": {
         "mobilesdk_app_id": "1:472984054820:android:13243ddc34ff02bfe0bcb1",
         "android_client_info": {
-          "package_name": "com.firebase_message_demo"
+          "package_name": "com.example.firebase_message_demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAy5Y793klrqNbK_NgQAUWC-EKTfLYEAGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472984054820:android:6316b084e6ecfc09e0bcb1",
+        "android_client_info": {
+          "package_name": "com.firebasemessagedemo"
         }
       },
       "oauth_client": [],

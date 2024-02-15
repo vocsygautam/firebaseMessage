@@ -1,4 +1,4 @@
-package com.firebase_message_demo;
+package com.firebasemessagedemo;
 
 import io.flutter.embedding.android.FlutterActivity;
 

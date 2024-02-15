@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAy5Y793klrqNbK_NgQAUWC-EKTfLYEAGk',
-    appId: '1:472984054820:android:13243ddc34ff02bfe0bcb1',
+    appId: '1:472984054820:android:6316b084e6ecfc09e0bcb1',
     messagingSenderId: '472984054820',
     projectId: 'fir-mssagedemo',
     storageBucket: 'fir-mssagedemo.appspot.com',
@@ -59,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDMu3ZVBjE_0u5axuli756yragwYxGkJIo',
-    appId: '1:472984054820:ios:231fdaeb4ab39daae0bcb1',
+    appId: '1:472984054820:ios:073ee9a67404fa71e0bcb1',
     messagingSenderId: '472984054820',
     projectId: 'fir-mssagedemo',
     storageBucket: 'fir-mssagedemo.appspot.com',
-    iosBundleId: 'com.example.firebaseMessageDemo',
+    iosBundleId: 'com.firebasemessagedemo',
   );
 }
