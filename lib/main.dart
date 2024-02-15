@@ -33,6 +33,7 @@ Future<void> main() async {
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     // Handle notification click event
     print('----------Notification clicked!----------');
+    FirebaseFirestore.instance.collection('app').doc('other').set({"data": 'ios app killed', "platform": Platform.operatingSystem});
     if (message.data['type'] == 'Send') {
       Get.to(() => const IOSScreen());
     } else {
@@ -83,18 +84,29 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if (Noti.notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
       Noti.selectedNotificationPayload = Noti.notificationAppLaunchDetails!.notificationResponse?.payload;
-      FirebaseFirestore.instance.collection('app').doc('payload').set({"notificationAppLaunchDetails":Noti.notificationAppLaunchDetails.toString(),"data": Noti.selectedNotificationPayload, "platform": Platform.operatingSystem});
-
+      FirebaseFirestore.instance.collection('app').doc('payload').set({
+        "notificationAppLaunchDetails": Noti.notificationAppLaunchDetails.toString(),
+        "data": Noti.selectedNotificationPayload,
+        "platform": Platform.operatingSystem
+      });
       final str = jsonDecode(Noti.selectedNotificationPayload!);
-      print('str----${str}');
-      print('operating-------${Platform.operatingSystem}');
       FirebaseFirestore.instance.collection('app').doc('other').set({"data": str, "platform": Platform.operatingSystem});
 
       if (str['type'] == 'Send') {
-        Get.to(() => const IOSScreen());
+        Get.to(() => const AndroidScreen());
       } else {
         Get.to(() => const OtherScreen());
       }
+    } else {
+      FirebaseMessaging.instance.getInitialMessage().then((value) {
+        if (value != null) {
+          if (value.data['type'] == 'Send') {
+            Get.to(() => const IOSScreen());
+          } else {
+            Get.to(() => const OtherScreen());
+          }
+        }
+      });
     }
     return Scaffold(
       appBar: AppBar(
