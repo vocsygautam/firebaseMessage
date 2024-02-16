@@ -4,7 +4,13 @@ import 'package:firebase_message_demo/android.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  print('notification ------------ (${notificationResponse.id})');
+  if (notificationResponse.input?.isNotEmpty ?? false) {
+    print('notification action tapped with input: ${notificationResponse.input}');
+  }
+}
 class Noti {
   /// Initialize the [FlutterLocalNotificationsPlugin] package.
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -15,26 +21,21 @@ class Noti {
   @pragma('vm:entry-point')
   static Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     print('Handling a background message ${message.data}');
-    showFlutterNotification(message);
-    // If you're going to use other Firebase services in the background, such as Firestore,
-    // make sure you call `initializeApp` before using other Firebase services.
   }
 
   /// Create a [AndroidNotificationChannel] for heads up notifications
   static AndroidNotificationChannel channel = const AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'High Importance Notifications', // title
-    importance: Importance.max,
+    'FirebaseChannel', // id
+    'Firebase Notifications', // title
+    importance: Importance.high,
   );
 
-   static NotificationAppLaunchDetails? notificationAppLaunchDetails;
+  static NotificationAppLaunchDetails? notificationAppLaunchDetails;
   static String? selectedNotificationPayload;
   static Future<void> setupFlutterNotifications() async {
-
-
     notificationAppLaunchDetails = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
     if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
-    selectedNotificationPayload = notificationAppLaunchDetails!.notificationResponse?.payload;
+      selectedNotificationPayload = notificationAppLaunchDetails!.notificationResponse?.payload;
     }
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/launcher_icon');
     const DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings(
@@ -54,14 +55,17 @@ class Noti {
       onDidReceiveNotificationResponse: (details) {
         selectNotificationStream.add(details.payload);
       },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
+
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
     /// Create an Android Notification Channel.
     ///
     /// We use this channel in the `AndroidManifest.xml` file to override the
     /// default FCM channel to enable heads up notifications.
-    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    await androidImplementation?.createNotificationChannel(channel);
     await androidImplementation?.requestNotificationsPermission();
 
     /// Create an IOS Notification Channel.
@@ -83,7 +87,6 @@ class Noti {
 
   /// IOS Receive Notification
   static void onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) async {
-    print('print--------');
     didReceiveLocalNotificationStream.add(
       ReceivedNotification(
         id: id,
@@ -100,9 +103,9 @@ class Noti {
       print('hello click event $json');
       print('hello click event type ${json['type']}');
       if (json['type'] == 'Send') {
-        Get.to(() => AndroidScreen());
+        Get.to(() => const AndroidScreen());
       } else {
-        Get.to(() => OtherScreen());
+        Get.to(() => const OtherScreen());
       }
     });
     didReceiveLocalNotificationStream.stream.listen((ReceivedNotification value) async {
@@ -123,7 +126,8 @@ class Noti {
         payload: jsonEncode(message.data),
         NotificationDetails(
           iOS: const DarwinNotificationDetails(),
-          android: AndroidNotificationDetails(channel.id, channel.name, icon: "@mipmap/launcher_icon"),
+          android: AndroidNotificationDetails(channel.id, channel.name,
+              icon: "@mipmap/launcher_icon", importance: channel.importance),
         ),
       );
     }

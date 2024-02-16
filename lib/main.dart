@@ -14,40 +14,34 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await Noti.setupFlutterNotifications();
-
-  /// Android Background Listener
+  /// ANDROID BACKGROUND LISTENER
   FirebaseMessaging.onBackgroundMessage(Noti.firebaseMessagingBackgroundHandler);
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-    print('Handling a foreground message ${event.data}');
-    Noti.showFlutterNotification(event);
-  });
-  // if (Platform.isAndroid) {
+  /// INITIALIZE
+  await Noti.setupFlutterNotifications();
+
+  /// HANDLING A FOREGROUND MESSAGE CLICK EVENT
+  FirebaseMessaging.onMessage.listen(Noti.showFlutterNotification);
   FirebaseMessaging.instance.getToken().then((value) {
-    print('Hello FCM Token ::: $value');
+    print('HELLO FCM TOKEN ::: $value');
     FirebaseFirestore.instance.collection('app').doc(Platform.operatingSystem).set({"token": value});
   });
 
-  /// IOS Background Listener
+  /// BACKGROUND CLICK LISTENER
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     // Handle notification click event
-    print('----------Notification clicked!----------');
     FirebaseFirestore.instance.collection('app').doc('other').set({"data": 'ios app killed', "platform": Platform.operatingSystem});
     if (message.data['type'] == 'Send') {
-      Get.to(() => const IOSScreen());
+      if (message.data['platform'] == 'ios') {
+        Get.to(() => const IOSScreen());
+      } else {
+        Get.to(() => const AndroidScreen());
+      }
     } else {
       Get.to(() => const OtherScreen());
     }
-    // Navigate to the desired screen
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => NextScreen()));
   });
 
-  //} else {
-  //   FirebaseMessaging.instance.getAPNSToken().then((value) {
-  //     print('hello fcm token $value');
-  //   });
-  // }
   runApp(const MyApp());
 }
 
@@ -72,23 +66,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  void _incrementCounter() {}
 
   @override
   Widget build(BuildContext context) {
     if (Noti.notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
       Noti.selectedNotificationPayload = Noti.notificationAppLaunchDetails!.notificationResponse?.payload;
-      FirebaseFirestore.instance.collection('app').doc('payload').set({
-        "notificationAppLaunchDetails": Noti.notificationAppLaunchDetails.toString(),
-        "data": Noti.selectedNotificationPayload,
-        "platform": Platform.operatingSystem
-      });
+      FirebaseFirestore.instance
+          .collection('app')
+          .doc('payload')
+          .set({"notificationAppLaunchDetails": Noti.notificationAppLaunchDetails.toString(), "data": Noti.selectedNotificationPayload, "platform": Platform.operatingSystem});
       final str = jsonDecode(Noti.selectedNotificationPayload!);
       FirebaseFirestore.instance.collection('app').doc('other').set({"data": str, "platform": Platform.operatingSystem});
 
@@ -112,14 +99,13 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text('Notification'),
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            Text(
               'Push Notification',
             ),
-            Text('$_counter'),
           ],
         ),
       ),
